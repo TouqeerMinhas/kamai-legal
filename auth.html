@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Open Kam-AI</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:40px 20px;line-height:1.6;color:#261814;background:#fffaf7;text-align:center}
+h1{color:#AB3500;font-size:1.5rem;margin:16px 0 8px}
+.btn{display:block;margin:24px 0 12px;padding:16px;border-radius:16px;background:#AB3500;color:#fff;font-weight:700;font-size:1.05rem;text-decoration:none}
+.muted{color:#6b5a54;font-size:.92rem}.err{background:#fde8e4;border-radius:12px;padding:12px;color:#8a1c0c}
+.hidden{display:none}
+</style></head>
+<body>
+<!-- Email links (sign-up confirmation, password reset) land here, then open the app
+     with the one-time code: kamai://auth/callback?code=…&flow=…  (Kam-AI repo:
+     docs/legal-site/auth.html). Email apps often can't open kamai:// links directly. -->
+<div id="ok">
+  <h1 id="title">Opening Kam-AI…</h1>
+  <p id="body">Tap the button below to continue in the app.<br><span class="muted">Neeche button dabayein — app khul jayegi.</span></p>
+  <a id="open" class="btn" href="#">Open Kam-AI</a>
+  <p class="muted">Open this link on the phone where Kam-AI is installed.<br>Ye link usi phone par kholein jahan Kam-AI install hai.</p>
+</div>
+<div id="fail" class="hidden">
+  <h1>Link not valid</h1>
+  <p class="err" id="reason"></p>
+  <p>This link has expired or was already used. In the app, request a new one.<br>
+  <span class="muted">Ye link purana ho gaya ya pehle istemal ho chuka. App mein naya link mangwayein.</span></p>
+</div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  h.forEach(function (v, k) { if (!q.has(k)) q.set(k, v); });
+  var flow = q.get('flow');
+  var err = q.get('error_description') || q.get('error_code') || q.get('error');
+  var target = 'kamai://auth/callback?' + q.toString();
+  if (err && !q.get('code')) {
+    document.getElementById('ok').className = 'hidden';
+    document.getElementById('fail').className = '';
+    document.getElementById('reason').textContent = err.replace(/\+/g, ' ');
+    return;
+  }
+  if (flow === 'signup') {
+    document.getElementById('title').textContent = 'Email confirmed ✓';
+    document.getElementById('body').innerHTML = 'Tap the button to open Kam-AI. You can also just open the app and log in.<br><span class="muted">Email confirm ho gayi. Button dabayein, ya app khol kar log in karein.</span>';
+  } else if (flow === 'recovery') {
+    document.getElementById('title').textContent = 'Reset your password';
+    document.getElementById('body').innerHTML = 'Tap the button to open Kam-AI and choose a new password.<br><span class="muted">Button dabayein — app mein naya password rakhein.</span>';
+  }
+  var link = document.getElementById('open');
+  link.href = target;
+  // Try once automatically; some email apps block it, so the button stays.
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    setTimeout(function () { location.href = target; }, 300);
+  }
+})();
+</script>
+</body></html>
